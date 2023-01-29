@@ -35,6 +35,28 @@ exports.allBooks = catchAsync(async (req, res, next) => {
     }
   );
 });
+exports.getOne = catchAsync(async (req, res, next) => {
+  // const lan = ValidatelanguageAndVersion(req, res);
+  const { language, version } = req.query;
+  const { id } = req.params;
+  if (!language) return next(new AppError('Parameter language : required', 400));
+  let lan = versions().find((v) => v.language === language);
+  if (!lan) return next(new AppError('This language does not exist !', 400));
+  if (version) {
+    lan = versions().find((v) => v.language === language && v.name === version);
+    if (!lan) return next(new AppError('We do not have this version for this language', 400));
+  }
+  connect(lan.file).all(
+    `
+    SELECT *
+    FROM books where book_number = ${id}
+  `,
+    (err, rows) => {
+      if (err) return next(new AppError(err.message, 500));
+      return res.json({ ok: true, code: 200, version: lan, book: rows[0] });
+    }
+  );
+});
 exports.versesChapterOfBook = (req, res) => {
   const { language, version } = req.query;
   if (!language) return next(new AppError('Parameter language : required', 400));

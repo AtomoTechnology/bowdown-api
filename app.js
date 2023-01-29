@@ -21,6 +21,7 @@ const {
   versesChapterOfBook,
   searchByWordsSentences,
   searchByBookChapter_Verse,
+  getOne,
 } = require('./controllers/bibleController');
 
 const app = express();
@@ -134,6 +135,7 @@ app.use('/api/v1/songs', require('./routes/songRoutes'));
 
 app.get('/api/v1/bible/versions', allVersion);
 app.get('/api/v1/bible/books', allBooks);
+app.get('/api/v1/bible/books/:id', getOne);
 app.get('/api/v1/bible/versesChapterOfBook/:bookNumber/:chapter', versesChapterOfBook);
 app.get('/api/v1/bible/searchByWroksSentences/', searchByWordsSentences);
 app.get('/api/v1/bible/searchByBookChapter_Verse', searchByBookChapter_Verse);
