@@ -11,7 +11,8 @@ process.on('uncaughtException', (err) => {
 
 const app = require('./app');
 //database connection
-const db = process.env.DATABASE.replace('<password>', process.env.DATABASE_PASSWORD);
+// const db = process.env.DATABASE.replace('<password>', process.env.DATABASE_PASSWORD);
+const db = process.env.DATABASE;
 mongoose
   // .connect(process.env.DATABASE_LOCAL, {
   .connect(db, {
