@@ -1,3 +1,4 @@
+const AppError = require('../helpers/AppError');
 const catchAsync = require('../helpers/catchAsync');
 const Song = require('../model/songModel');
 const { songs } = require('./chantDesperans');
@@ -88,3 +89,47 @@ exports.CreateMultiples = catchAsync(async (req, res, next) => {
 exports.deleteSong = factory.deleteOne(Song);
 exports.updateSong = factory.updateOne(Song);
 exports.GetOneSong = factory.getOne(Song, { path: 'book' });
+
+exports.addLikes = catchAsync(async (req, res, next) => {
+  const doc = await Song.findById(req.params.id);
+
+  if (!doc) {
+    return next(new AppError('No document with that ID ', 404));
+  }
+  const newDoc = await Song.findByIdAndUpdate(
+    req.params.id,
+    { likes: doc.likes + 1 },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.status(200).json({
+    status: 'success',
+    ok: true,
+    data: { data: newDoc },
+  });
+});
+
+exports.addViews = catchAsync(async (req, res, next) => {
+  const doc = await Song.findById(req.params.id);
+
+  if (!doc) {
+    return next(new AppError('No document with that ID ', 404));
+  }
+  const newDoc = await Song.findByIdAndUpdate(
+    req.params.id,
+    { views: doc.views + 1 },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  res.status(200).json({
+    status: 'success',
+    ok: true,
+    data: { data: newDoc },
+  });
+});

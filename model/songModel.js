@@ -16,13 +16,7 @@ const songsSchema = new mongoose.Schema(
     views: Number,
     likes: Number,
     num: Number,
-    videos: [
-      {
-        duration: Number,
-        url: String,
-        provider: String,
-      },
-    ],
+    videos: String,
     lyrics: String,
     language: String,
     songId: String,
