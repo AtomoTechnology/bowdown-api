@@ -111,7 +111,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   //vaerify token
   const decoded = await promisify(jwt.verify)(token, process.env.SECRET_TOKEN_NATOURS);
-
+  console.log(decoded);
   //check if user exist
   const currentUser = await User.findById(decoded.id);
   if (!currentUser) {
@@ -129,6 +129,11 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   next();
 });
+
+exports.renewToken = catchAsync(async (req, res, next) => {
+  createSendToken(req.user, 200, res);
+});
+
 exports.fakeProtect = catchAsync(async (req, res, next) => {
   let token;
   //getting token

@@ -59,7 +59,12 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error';
 
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
+    let error = Object.assign(err);
+    console.log('aca ');
+    console.log(error.name);
+    if (error.name === 'JsonWebTokenError') error = handleJsonWebTokenError();
+    console.log('aca ');
+    sendErrorDev(error, res);
   } else if (process.env.NODE_ENV === 'production') {
     // let error = { ...err };
     console.log(err);

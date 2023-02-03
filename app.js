@@ -11,6 +11,7 @@ const cors = require('cors');
 const AppError = require('./helpers/AppError');
 const globalErrorHandler = require('./controllers/errorController');
 const usersRouter = require('./routes/usersRoutes');
+const favoritesSongs = require('./routes/favoriteSongRoutes');
 const toursRouter = require('./routes/toursRoutes');
 const postRouter = require('./routes/postRoutes');
 const viewRouter = require('./routes/viewRoutes');
@@ -124,7 +125,7 @@ app.use((req, res, next) => {
 app.use('/', viewRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/tours', toursRouter);
-// app.use('/api/v1/posts', postsRouter);
+app.use('/api/v1/favorites-songs', favoritesSongs);
 app.use('/api/v1/posts', postRouter);
 
 // chants
