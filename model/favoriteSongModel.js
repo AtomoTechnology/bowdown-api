@@ -22,7 +22,8 @@ favoriteSongSchema.index({ song: 1, user: 1 }, { unique: true });
 favoriteSongSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'song',
-    select: 'id title lyrics',
+    select: 'id title num',
+    populate: { path: 'book', select: 'name' },
   });
   next();
 });
