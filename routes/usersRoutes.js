@@ -7,7 +7,6 @@ const usersRouter = express.Router();
 
 usersRouter.post('/signup', authController.signUp);
 usersRouter.post('/signin', authController.signIn);
-usersRouter.get('/logout', authController.logout);
 usersRouter.post('/forgotPassword', authController.forgotPassword);
 usersRouter.patch('/resetPassword/:token', authController.resetPassword);
 
@@ -16,11 +15,11 @@ usersRouter.use(authController.protect);
 usersRouter.post('/renewToken', authController.renewToken);
 usersRouter.get('/Me', userController.GetMe, userController.getUser);
 usersRouter.patch('/updateMyPassword', authController.updatePassword);
-usersRouter.patch('/updateMe', userController.uploadUserPhoto, userController.resizeUserPhoto, userController.updateMe);
-
-usersRouter.delete('/deleteMe', userController.deleteMe);
+usersRouter.patch('/updateMe', authController.restrictTo('user', 'manager', 'admin'), userController.updateMe);
+usersRouter.delete('/deleteMe', authController.restrictTo('user', 'manager'), userController.deleteMe);
 
 usersRouter.use(authController.restrictTo('admin'));
+
 usersRouter.route('/').get(userController.getAllUsers);
 usersRouter
   .route('/:id')

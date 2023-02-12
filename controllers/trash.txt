@@ -1,0 +1,45 @@
+
+// (req, res, next) => {
+//   let query = ' SELECT * FROM favouriteSongs ';
+//   if (req.query.userId) {
+//     query += ` WHERE userId = '${req.query.userId}'`;
+//   }
+
+//   connect('ATESPIEDSJESUS.SQLite3').all(query, [], (err, rows) => {
+//     if (err) {
+//       connect().close();
+//       return next(new AppError(err.message, 400));
+//     }
+//     res.json({ ok: true, results: rows.length, status: 'success', code: 200, data: rows });
+//     connect().close();
+//   });
+// };
+
+// (req, res, next) => {
+// const { userId, songId, num, title, categoryName } = req.body;
+
+// let query = `INSERT INTO favouriteSongs (userId,songId,title,num,categoryName,createdAt) values(?,?,?,?,?,?)`;
+// connect('ATESPIEDSJESUS.SQLite3').run(query, [userId, songId, title, num, categoryName, new Date()], function (err) {
+//   if (err) {
+//     connect().close();
+//     return next(new AppError(err.message, 400));
+//   }
+//   res.json({ ok: true, status: 'success', code: 200, data: this });
+//   connect().close();
+// });
+// };
+
+(req, res, next) => {
+  if (!req.params.id) {
+    return next(new AppError('The id is required to delete a faveourite song !', 400));
+  }
+  let query = `DELETE FROM  favouriteSongs WHERE  id = ?`;
+  connect('ATESPIEDSJESUS.SQLite3').run(query, [req.params.id], (err) => {
+    if (err) {
+      connect().close();
+      return next(new AppError(err.message, 400));
+    }
+    res.json({ ok: true, status: 'success', code: 200 });
+    connect().close();
+  });
+};

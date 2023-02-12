@@ -1,9 +1,8 @@
-const catchAsync = require('../helpers/catchAsync');
-const FavoriteSong = require('../model/favoriteSongModel');
-const factory = require('./handlerFactory');
+const { connect } = require('../db');
+const AppError = require('../helpers/AppError');
+const factory = require('./factoryController');
+const FavouriteSong = require('../schemas/favouriteSong');
 
-exports.GetAll = factory.getAll(FavoriteSong);
-exports.Create = factory.createOne(FavoriteSong);
-exports.deleteFavoriteSong = factory.deleteOne(FavoriteSong);
-exports.updateFavoriteSong = factory.updateOne(FavoriteSong);
-exports.GetOneFavoriteSong = factory.getOne(FavoriteSong);
+exports.GetAll = factory.all(FavouriteSong);
+exports.Create = factory.create(FavouriteSong, ['UserId', 'SongId']);
+exports.Destroy = factory.destroy(FavouriteSong);

@@ -1,6 +1,6 @@
 const catchAsync = require('../helpers/catchAsync');
 const Post = require('./../model/postModel');
-const factory = require('./handlerFactory');
+const factory = require('./handlerFactory1');
 
 // exports.setTourAndUserIds = (req, res, next) => {
 //   if (!req.body.tour) req.body.tour = req.params.tourId;
