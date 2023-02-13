@@ -116,7 +116,7 @@ exports.CreateMultiples = catchAsync(async (req, res, next) => {
 });
 
 exports.GetOneSong = factory.findOne(Song, {
-  include: [{ model: User }, { model: SongCategory, attributes: ['id', 'name'] }],
+  include: [{ model: User }],
 });
 
 exports.addLikes = catchAsync(async (req, res, next) => {

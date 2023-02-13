@@ -36,6 +36,7 @@ const FavouriteSong = dbConnect.define(
     tableName: 'favouritesongs',
   }
 );
-
+FavouriteSong.belongsTo(Song);
+FavouriteSong.belongsTo(User);
 // return FavouriteSong;
 module.exports = FavouriteSong;
