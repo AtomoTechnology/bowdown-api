@@ -112,42 +112,45 @@ exports.getIntro = catchAsync(async (req, res, next) => {
 exports.lecture = catchAsync(async (req, res, next) => {
   const lan = req.lan;
   const { bookNumber, chapter } = req.params;
-  const query = `SELECT v.book_number,v.chapter , v.verse,v.text ,st.title,st.verse startVerseTitle FROM verses v  
-                 left join stories st on v.book_number = st.book_number and v.chapter = st.chapter and v.verse = st.verse
+  const query = `SELECT v.book_number,v.chapter , v.verse,v.text FROM verses v   
                  WHERE v.book_number = ${bookNumber} and v.chapter = ${chapter}
                   `;
+  // const query = `SELECT v.book_number,v.chapter , v.verse,v.text ,st.title,st.verse startVerseTitle FROM verses v
+  //                left join stories st on v.book_number = st.book_number and v.chapter = st.chapter and v.verse = st.verse
+  //                WHERE v.book_number = ${bookNumber} and v.chapter = ${chapter}
+  //                 `;
   connect(lan.file).all(query, (err, rows) => {
     if (err) return next(new AppError(err.message, 500));
-    let output = rows.reduce((acc, currentValue, currentIndex, data) => {
-      if (acc.find((d) => d.verse == currentValue.verse && d.text == currentValue.text)) {
-        return acc.map((l) => {
-          if (currentValue.verse === l.verse) {
-            l.titles = [...l.titles, currentValue?.title];
-          }
-          return l;
-        });
-      } else {
-        return [
-          ...acc,
-          {
-            book_number: currentValue.book_number,
-            chapter: currentValue.chapter,
-            verse: currentValue.verse,
-            text: currentValue.text,
-            startVerseTitle: currentValue.startVerseTitle,
-            titles: currentValue.title ? [currentValue?.title] : null,
-          },
-        ];
-      }
-    }, []);
+    // let output = rows.reduce((acc, currentValue, currentIndex, data) => {
+    //   if (acc.find((d) => d.verse == currentValue.verse && d.text == currentValue.text)) {
+    //     return acc.map((l) => {
+    //       if (currentValue.verse === l.verse) {
+    //         l.titles = [...l.titles, currentValue?.title];
+    //       }
+    //       return l;
+    //     });
+    //   } else {
+    //     return [
+    //       ...acc,
+    //       {
+    //         book_number: currentValue.book_number,
+    //         chapter: currentValue.chapter,
+    //         verse: currentValue.verse,
+    //         text: currentValue.text,
+    //         startVerseTitle: currentValue.startVerseTitle,
+    //         titles: currentValue.title ? [currentValue?.title] : null,
+    //       },
+    //     ];
+    //   }
+    // }, []);
     return res.json({
       ok: true,
-      results: output.length,
+      results: rows.length,
       status: true,
       code: 200,
       data: {
         version: lan,
-        verses: output,
+        verses: rows,
       },
     });
   });
