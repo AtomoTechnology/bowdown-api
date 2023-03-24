@@ -33,6 +33,14 @@ const FavouriteVerse = dbConnect.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    bookNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    version: {
+      type: DataTypes.JSON,
+      allowNull: false,
+    },
     chapter: {
       type: DataTypes.INTEGER,
       allowNull: false,

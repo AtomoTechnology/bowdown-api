@@ -6,7 +6,9 @@ const FavouriteVerse = require('../schemas/favouriteVerse');
 const User = require('../schemas/user');
 const factory = require('./factoryController');
 
-exports.getAllFavouriteVerses = factory.all(FavouriteVerse, { include: [{ model: User }] });
+// include: [{ model: User }];
+
+exports.getAllFavouriteVerses = factory.all(FavouriteVerse);
 exports.createFavouriteVerse = factory.create(FavouriteVerse, [
   'UserId',
   'uuid',
@@ -17,14 +19,17 @@ exports.createFavouriteVerse = factory.create(FavouriteVerse, [
   'type',
   'color',
   'bookName',
+  'bookNumber',
+  'version',
 ]);
 
-exports.destroy = catchAsync(async (req, res, next) => {
-  const data = await FavouriteVerse.describe();
-  return res.json({
-    data,
-  });
-});
+exports.destroy = factory.destroy(FavouriteVerse);
+// exports.destroy = catchAsync(async (req, res, next) => {
+//   const data = await FavouriteVerse.describe();
+//   return res.json({
+//     data,
+//   });
+// });
 
 exports.ValidatelanguageAndVersion = (req, res, next) => {
   const { language, version } = req.query;
