@@ -7,6 +7,7 @@ exports.connect = (file) => {
 };
 exports.dbConnect = new Sequelize({
   dialect: 'sqlite',
+  logging: false,
   storage: './db/ATESPIEDSJESUS.SQLIte3',
 });
 

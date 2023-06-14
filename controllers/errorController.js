@@ -1,80 +1,61 @@
 const AppError = require('../helpers/AppError');
 
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    message: err.message,
-    error: err,
-    ok: false,
-    stack: err.stack,
-  });
-};
-const sendErrorProd = (err, res) => {
-  console.log(err);
-  if (err.isOperational) {
-    res.status(err.statusCode).json({
+const handleSequelizeValidationError = (error) => new AppError(error.errors.map((e) => e.message).join(',,'), 400);
+const handleSequelizeForeignKeyConstraintError = (error) =>
+  new AppError(
+    `Hay problema con la(s) clave(s) foránea(s) (${error.fields?.join(',')}) de la tabla ${error?.table
+    }. Asegúrese de enviar los datos correctamente.`,
+    400
+  );
+const handleSequelizeUniqueConstraintError = (error) =>
+  new AppError(error.errors.map((e) => e.message).join(',,'), 400);
+const handleJsonWebTokenError = () => new AppError(`Token  no valido. Inicia sesión de nuevo.`, 401);
+const handleJWTExpiredToken = () => new AppError('Su token ha caducado. Vuelva a iniciar sesión, por favor.', 401);
+const handleSequelizeAccessDeniedError = () =>
+  new AppError(
+    'Error al intentar conectarse a la base de datos. Verifica que todos los datos de conexión esten correctos.',
+    401
+  );
+
+const sendError = (err, res) => {
+  if (process.env.NODE_ENV !== 'production') {
+    return res.status(err.statusCode).json({
+      ok: false,
       status: err.status,
-      ok: false,
-      message: err.message,
-      error: err,
-    });
-  } else {
-    console.log('ERROR ', err);
-
-    res.status(500).json({
-      status: 'error',
-      ok: false,
-
-      message: 'Something went very wrong !! Try again please...',
-      error: err,
+      message: err.message.split(',,')[0],
+      errors: err.message.split(',,'),
+      error: { ...err, message: err.message },
+      stack: err.stack,
     });
   }
-};
 
-const handleDuplicateFieldsDB = (error) => {
-  // const value = error.errmsg.match(/"(.*?)"/);
-  // console.log(value);
-  const field = Object.keys(error.keyPattern)[0];
-  const values = Object.values(error.keyValue)[0];
-  const message = `Duplicate ${field} : ${values}`;
-  return new AppError(message, 400);
-};
+  if (err.isOperational) {
+    return res.status(err.statusCode).json({
+      ok: false,
+      status: err.status,
+      message: err.message.split(',,')[0],
+      errors: err.message.split(',,'),
+      code: err.statusCode,
+    });
+  }
 
-const handleCastErrorDB = (error) => {
-  const message = `Invalid ${error.path} : ${error.value}`;
-  return new AppError(message, 400);
+  return res
+    .status(500)
+    .json({ ok: false, status: 'error', code: 500, message: '¡¡Algo salió  mal!! Por favor, inténtalo de nuevo.' });
 };
-
-const handleValidationErrorDB = (err) => {
-  const errors = Object.values(err.errors).map((el) => el.message);
-  const message = `Invalid input data. ${errors.join('. ')}`;
-  return new AppError(message, 400);
-};
-const handleJsonWebTokenError = () => new AppError(`Invalid token. Please log in again!`, 401);
-
-const handleJWTExpiredToken = () => new AppError('Your token has expired . Log in again please. ', 401);
 
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
-  if (process.env.NODE_ENV === 'development') {
-    let error = Object.assign(err);
-    console.log('aca ');
-    console.log(error);
-    if (error.name === 'JsonWebTokenError') error = handleJsonWebTokenError();
-    console.log('aca ');
-    sendErrorDev(error, res);
-  } else if (process.env.NODE_ENV === 'production') {
-    // let error = { ...err };
-    console.log(err);
-    let error = Object.assign(err);
-    // if (error.kind === 'ObjectId') error = handleCastErrorDB(error);
-    if (error.name === 'CastError') error = handleCastErrorDB(error);
-    if (error.code === 11000) error = handleDuplicateFieldsDB(error);
-    if (error.name === 'ValidationError') error = handleValidationErrorDB(error);
-    if (error.name === 'JsonWebTokenError') error = handleJsonWebTokenError();
-    if (error.name === 'TokenExpiredError') error = handleJWTExpiredToken();
-    sendErrorProd(error, res);
-  }
+  let error = Object.assign(err);
+  // console.log(error);
+  if (error.name === 'SequelizeAccessDeniedError') error = handleSequelizeAccessDeniedError();
+  if (error.name === 'JsonWebTokenError') error = handleJsonWebTokenError();
+  if (error.name === 'TokenExpiredError') error = handleJWTExpiredToken();
+  if (error.name === 'SequelizeValidationError') error = handleSequelizeValidationError(error);
+  if (error.name === 'SequelizeUniqueConstraintError') error = handleSequelizeUniqueConstraintError(error);
+  if (error.name === 'SequelizeForeignKeyConstraintError') error = handleSequelizeForeignKeyConstraintError(error);
+
+  sendError(error, res);
 };
