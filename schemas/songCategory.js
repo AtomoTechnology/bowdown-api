@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
-const { dbConnect } = require('./../db/index');
-// const FavouriteSong = require('./favouriteSong');
-const Song = require('./song');
+const { DataTypes } = require('sequelize')
+const { dbConnect } = require('../db/index')
+const Song = require('./song')
+
 const SongCategory = dbConnect.define(
   'SongCategory',
   {
@@ -9,32 +9,35 @@ const SongCategory = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true,
+      autoIncrement: true
     },
     uuid: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
-      unique: true,
+      unique: true
     },
     name: {
-      type: DataTypes.STRING(30),
+      type: DataTypes.STRING(35),
       allowNull: false,
-      unique: true,
+      unique: true
     },
     slug: {
-      type: DataTypes.STRING(30),
+      type: DataTypes.STRING(35),
       allowNull: false,
-      unique: true,
+      unique: true
     },
     abbreviation: {
       allowNull: false,
       unique: true,
-      type: DataTypes.STRING,
-    },
+      type: DataTypes.STRING
+    }
   },
   {
     tableName: 'songcategories',
+    modelName: 'SongCategory'
   }
-);
+)
 
-module.exports = SongCategory;
+SongCategory.hasMany(Song, { foreignKey: { allowNull: false }, onUpdate: 'CASCADE', onDelete: 'RESTRICT' })
+Song.belongsTo(SongCategory, { foreignKey: { allowNull: false }, onUpdate: 'CASCADE', onDelete: 'RESTRICT' })
+module.exports = SongCategory

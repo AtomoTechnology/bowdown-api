@@ -1,7 +1,7 @@
-const { DataTypes } = require('sequelize');
-const { dbConnect } = require('./../db/index');
-const Song = require('./song');
-const User = require('./user');
+const { DataTypes } = require('sequelize')
+const { dbConnect } = require('./../db/index')
+const Song = require('./song')
+const User = require('./user')
 const FavouriteSong = dbConnect.define(
   'FavouriteSong',
   {
@@ -9,34 +9,27 @@ const FavouriteSong = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true,
+      autoIncrement: true
     },
     uuid: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      defaultValue: DataTypes.UUIDV4
     },
     UserId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: User,
-        key: 'id',
-      },
+      type: DataTypes.BIGINT,
+      allowNull: false
     },
     SongId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: Song,
-        key: 'id',
-      },
-    },
+      type: DataTypes.BIGINT,
+      allowNull: false
+    }
   },
   {
     tableName: 'favouritesongs',
+    modelName: 'FavouriteSong',
+    timestamps: true
   }
-);
-FavouriteSong.belongsTo(Song);
-FavouriteSong.belongsTo(User);
-// return FavouriteSong;
-module.exports = FavouriteSong;
+)
+FavouriteSong.belongsTo(Song)
+FavouriteSong.belongsTo(User)
+module.exports = FavouriteSong

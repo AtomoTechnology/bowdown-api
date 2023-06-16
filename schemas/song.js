@@ -1,6 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { dbConnect } = require('./../db/index');
-const SongCategory = require('./songCategory');
+const { DataTypes } = require('sequelize')
+const { dbConnect } = require('./../db/index')
 const Song = dbConnect.define(
   'Song',
   {
@@ -8,64 +7,62 @@ const Song = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true,
+      autoIncrement: true
     },
     uuid: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      defaultValue: DataTypes.UUIDV4
     },
     views: {
       type: DataTypes.INTEGER,
-      defaultValue: 0,
+      defaultValue: 0
     },
     likes: {
       type: DataTypes.INTEGER,
-      defaultValue: 0,
+      defaultValue: 0
     },
     title: {
       allowNull: false,
-      type: DataTypes.STRING,
+      type: DataTypes.STRING
     },
     num: {
       allowNull: false,
-      type: DataTypes.INTEGER,
+      type: DataTypes.INTEGER
     },
     songId: {
       allowNull: false,
-      type: DataTypes.STRING,
+      type: DataTypes.STRING
     },
     lyrics: {
       allowNull: false,
-      type: DataTypes.TEXT('medium'),
+      type: DataTypes.TEXT('medium')
     },
     lyricsHtml: {
       allowNull: false,
-      type: DataTypes.TEXT('medium'),
+      type: DataTypes.TEXT('medium')
     },
     slug: {
       allowNull: false,
-      type: DataTypes.STRING,
+      type: DataTypes.STRING
     },
     video: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING
     },
     language: {
       type: DataTypes.STRING(2),
-      allowNull: false,
+      allowNull: false
     },
     SongCategoryId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: SongCategory,
-        key: 'id',
-      },
-    },
+      type: DataTypes.BIGINT,
+      allowNull: false
+    }
   },
   {
     tableName: 'songs',
+    modelName: 'Song',
+    timestamps: true
   }
-);
-SongCategory.hasMany(Song);
-Song.belongsTo(SongCategory);
-module.exports = Song;
+)
+// SongCategory.hasMany(Song)
+// Song.belongsTo(SongCategory)
+module.exports = Song

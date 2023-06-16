@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { dbConnect } = require('./../db/index');
+const { DataTypes } = require('sequelize')
+const { dbConnect } = require('./../db/index')
 const VerseDay = dbConnect.define(
   'VerseDay',
   {
@@ -7,40 +7,42 @@ const VerseDay = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true,
+      autoIncrement: true
     },
     uuid: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      defaultValue: DataTypes.UUIDV4
     },
     version: {
       type: DataTypes.JSON,
-      allowNull: false,
+      allowNull: false
     },
     bookName: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.STRING(70),
+      allowNull: false
     },
     bookNumber: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: false
     },
     chapter: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: false
     },
     verse: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: false
     },
     text: {
       type: DataTypes.JSON,
-      allowNull: false,
-    },
+      allowNull: false
+    }
   },
   {
     tableName: 'verseofthedays',
+    modelName: 'VerseDay',
+    timestamps: true
   }
-);
+)
 
-module.exports = VerseDay;
+module.exports = VerseDay

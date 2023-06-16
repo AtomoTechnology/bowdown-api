@@ -1,77 +1,51 @@
-const catchAsync = require('../helpers/catchAsync');
-const { Op } = require('sequelize');
+const catchAsync = require('../helpers/catchAsync')
+const AppError = require('../helpers/AppError')
+const filterQueryParams = require('../helpers/filterqueryParams')
+const { generateFakeData } = require('../helpers/faker')
 
 const filterFields = (obj, allowedFields) => {
-  const newObj = {};
-  Object.keys(obj).forEach((el) => {
-    if (allowedFields.includes(el)) newObj[el] = obj[el];
-  });
-  return newObj;
-};
+  const newObj = {}
+  Object.keys(obj).forEach((el) => { if (allowedFields.includes(el)) newObj[el] = obj[el] })
+  return newObj
+}
+
+exports.create = (Model, allowedFileds = null) =>
+  catchAsync(async (req, res) => {
+    const insertedFileds = allowedFileds ? filterFields(req.body, allowedFileds) : req.body
+    const doc = await Model.create(insertedFileds)
+    return res.json({
+      ok: true,
+      code: 201,
+      status: 'success',
+      message: 'The record was created successfully.',
+      data: doc
+    })
+  })
+
+exports.bulk = (Model, data = null) =>
+  catchAsync(async (req, res) => {
+    const doc = await Model.bulkCreate(data || req.body)
+    return res.json({
+      ok: true,
+      code: 200,
+      results: doc.length,
+      status: 'success',
+      message: 'The records were created successfully.',
+      data: doc
+    })
+  })
 
 exports.all = (Model, opts = null) =>
   catchAsync(async (req, res) => {
-    if (opts) {
-      var { include } = opts;
-    }
-    const queryFiltered = { ...req.query };
-    const excludeFields = ['page', 'sort', 'limit', 'fields'];
-    excludeFields.forEach((el) => delete queryFiltered[el]);
-    let options = { ...queryFiltered };
-
-    Object.keys(queryFiltered).map((k) => {
-      if (queryFiltered[k].toString().split(':').length > 1) {
-        let val = queryFiltered[k].toString().split(':');
-        switch (val[1]) {
-          case 'like':
-            options[`${k}`] = { [Op.substring]: val[0] };
-            break;
-          case 'eq':
-            options[`${k}`] = { [eq.eq]: val[0] };
-            break;
-          case 'ne':
-            options[`${k}`] = { [Op.ne]: val[0] };
-            break;
-          case 'gt':
-            options[`${k}`] = { [Op.gt]: Number(val[0]) };
-            break;
-          case 'gte':
-            options[`${k}`] = { [Op.gte]: Number(val[0]) };
-            break;
-          case 'lt':
-            options[`${k}`] = { [Op.lt]: Number(val[0]) };
-            break;
-          case 'lte':
-            options[`${k}`] = { [Op.lte]: Number(val[0]) };
-            break;
-          case 'between':
-            options[`${k}`] = { [Op.between]: val[0].split(',').map((i) => Number(i)) };
-            break;
-          case 'or':
-            options[`${k}`] = { [Op.or]: val[0].split(',').map((i) => (typeof i === 'number' ? Number(i) : i)) };
-            break;
-          case 'and':
-            options[`${k}`] = { [Op.and]: val[0].split(',').map((i) => (typeof i === 'number' ? Number(i) : i)) };
-            break;
-          case 'notBetween':
-            options[`${k}`] = { [Op.notBetween]: val[0].split(',').map((i) => Number(i)) };
-            break;
-          case 'in':
-            options[`${k}`] = { [Op.in]: val[0].split(',').map((i) => (typeof i === 'number' ? Number(i) : i)) };
-            break;
-          case 'notIn':
-            options[`${k}`] = { [Op.notIn]: val[0].split(',').map((i) => (typeof i === 'number' ? Number(i) : i)) };
-            break;
-          default:
-            break;
-        }
-      }
-    });
-
-    // console.log('OPTIONS : ', options);
+    let include = null
+    if (opts && req.query.include === undefined) include = opts.include
+    else include = undefined
+    const queryFiltered = { ...req.query }
+    const excludeFields = ['page', 'sort', 'limit', 'fields', 'include']
+    excludeFields.forEach((el) => delete queryFiltered[el])
 
     const docs = await Model.findAll({
-      where: options,
+      where: filterQueryParams(queryFiltered),
       include,
       attributes: req.query.fields
         ? req.query.fields
@@ -80,36 +54,40 @@ exports.all = (Model, opts = null) =>
           .map((el) => (el.includes(':') ? el.split(':') : el))
         : '',
       order:
-        req.query.sort !== undefined
+        req.query.sort
           ? req.query.sort
             .toString()
             .split(',')
             .map((el) => el.split(':'))
-          : [['createdAt', 'desc']],
-    });
+          : [['id', 'desc']]
+    })
     return res.json({
-      results: docs.length,
+      ok: true,
       code: 200,
       status: 'success',
-      ok: true,
-      data: docs,
-    });
-  });
+      results: docs.length,
+      data: docs
+    })
+  })
 
-exports.paginate = (Model) =>
+exports.paginate = (Model, opts = null) =>
   catchAsync(async (req, res, next) => {
-    if (!req.query.limit || !req.query.page)
-      return next(new Error('El parametro limit y/o page es obligatorio para usar este metodo!'));
+    // if (!req.query.limit || !req.query.page) { return next(new Error('El parametro limit y/o page es obligatorio para usar este metodo!')) }
+    let include = null
+    if (opts && req.query.include === undefined) include = opts.include
+    else include = undefined
+    const queryFiltered = { ...req.query }
 
-    const queryFiltered = { ...req.query };
+    const excludeFields = ['page', 'sort', 'limit', 'fields', 'include']
+    excludeFields.forEach((el) => delete queryFiltered[el])
 
-    const excludeFields = ['page', 'sort', 'limit', 'fields'];
-    excludeFields.forEach((el) => delete queryFiltered[el]);
-    const page = parseInt(req.query.page) * 1 || 1;
-    const limit = parseInt(req.query.limit) * 1 || 50;
-    const offset = (page - 1) * limit;
-    const docs = await Model.findAll({
-      where: queryFiltered,
+    const page = parseInt(req.query.page) * 1 || 1
+    const limit = parseInt(req.query.limit) * 1 || 30
+    const offset = (page - 1) * limit
+
+    const { rows, count } = await Model.findAndCountAll({
+      where: filterQueryParams(queryFiltered),
+      include,
       limit,
       offset,
       attributes: req.query.fields
@@ -119,121 +97,143 @@ exports.paginate = (Model) =>
           .map((el) => (el.includes(':') ? el.split(':') : el))
         : '',
       order:
-        req.query.sort !== undefined
+        req.query.sort
           ? req.query.sort
             .toString()
             .split(',')
             .map((el) => el.split(':'))
-          : [['createdAt', 'desc']],
-    });
+          : [['id', 'desc']]
+    })
 
     return res.json({
-      results: docs.length,
+      ok: true,
       code: 200,
       status: 'success',
-      ok: true,
+      results: rows.length,
+      total: count,
       page,
       offset,
-      data: docs,
-    });
-  });
+      data: rows
+    })
+  })
 
-exports.findOne = (Model, opts = null) =>
+exports.findByPk = (model, opts = null) =>
   catchAsync(async (req, res, next) => {
-    if (opts) {
-      var { include } = opts;
-    }
-    const doc = await Model.findOne({
-      where: { id: req.params.id },
+    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError('The id is required to get a record and has to be a valid value.', 400))
+    let include = null
+    if (opts && req.query.include === undefined) include = opts.include
+    else include = undefined
+
+    const doc = await model.findByPk(req.params.id, { include })
+    if (!doc) return next(new AppError('There is no document with that ID.', 404))
+    return res.status(200).json({
+      ok: true,
+      code: 200,
+      status: 'success',
+      data: doc
+    })
+  })
+
+exports.findOne = (model, opts = null) =>
+  catchAsync(async (req, res, next) => {
+    let include = null
+    if (opts && req.query.include === undefined) include = opts.include
+    else include = undefined
+
+    const queryFiltered = { ...req.query }
+    const excludeFields = ['page', 'sort', 'limit', 'fields', 'include']
+    excludeFields.forEach((el) => delete queryFiltered[el])
+
+    const doc = await model.findOne({
+      where: filterQueryParams(queryFiltered),
       include,
       attributes: req.query.fields
         ? req.query.fields
           .toString()
           .split(',')
           .map((el) => (el.includes(':') ? el.split(':') : el))
-        : '',
-    });
-    if (!doc) return next(new Error(`No hay documento para el ${req.params.id}`));
-    return res.json({
+        : ''
+    })
+
+    return res.status(200).json({
+      ok: true,
       code: 200,
       status: 'success',
-      ok: true,
-      data: doc,
-    });
-  });
+      data: doc
+    })
+  })
 
-exports.create = (Model, allowedFileds) =>
-  catchAsync(async (req, res) => {
-    const insertedFileds = filterFields(req.body, allowedFileds);
-    const doc = await Model.create(insertedFileds);
-    return res.json({
-      code: 200,
-      status: 'success',
-      ok: true,
-      message: 'El documento fue guardado con exito',
-      data: doc,
-    });
-  });
-
-exports.bulk = (Model) =>
-  catchAsync(async (req, res) => {
-    const doc = await Model.bulkCreate(req.body);
-    return res.json({
-      code: 200,
-      status: 'success',
-      ok: true,
-      message: 'El documento fue guardado con exito',
-      data: doc,
-    });
-  });
-
-exports.update = (Model, allowedFileds) =>
+exports.update = (Model, allowedFileds = null) =>
   catchAsync(async (req, res, next) => {
-    const insertedFileds = filterFields(req.body, allowedFileds);
-    const doc = await Model.update(insertedFileds, { where: { id: req.params.id } });
-    if (doc[0] <= 0) return next(new Error('No hay documento(s) con id : ' + req.params.id));
+    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError('The id is required to update a record and has to be a valid value.', 400))
+
+    const insertedFileds = allowedFileds ? filterFields(req.body, allowedFileds) : req.body
+    const doc = await Model.update(insertedFileds, { where: { id: req.params.id } })
+
+    if (doc[0] <= 0) return next(new AppError(`The record with id :  ${req.params.id} does not exist or no record was updated in the table.`, 304))
+
     return res.json({
+      ok: true,
       status: 'success',
       code: 200,
-      ok: true,
-      message: 'El documento fue actualizado con exito',
-    });
-  });
+      message: 'The record was updated successfully.'
+    })
+  })
 
 exports.down = (Model) =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.update({ state: 2 }, { where: { id: req.params.id } });
-    if (doc[0] <= 0) return next(new Error('No hay documento con id : ' + req.params.id));
+    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError('The id is required to update a record and has to be a valid value.', 400))
+    const doc = await Model.update({ active: 0 }, { where: { id: req.params.id } })
+    if (doc[0] <= 0) return next(new AppError(`There is no record with the id :  ${req.params.id} `, 304))
     return res.json({
-      code: 200,
-      status: 'success',
       ok: true,
-      message: 'El documento fue actualizado con exito',
-      data: null,
-    });
-  });
+      status: 'success',
+      code: 200,
+      message: 'The record was updated successfully.',
+      data: null
+    })
+  })
 
 exports.up = (Model) =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.update({ state: 1 }, { where: { id: req.params.id } });
-    if (doc[0] <= 0) return next(new Error('No hay documento con id : ' + req.params.id));
+    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError('The id is required to update a record and has to be a valid value.', 400))
+    const doc = await Model.update({ state: 1 }, { where: { id: req.params.id } })
+    if (doc[0] <= 0) return next(new AppError(`There is no record with the id :  ${req.params.id} `, 304))
     return res.json({
+      ok: true,
       status: 'success',
       code: 200,
-      ok: true,
-      message: 'El documento fue actualizado con exito',
-    });
-  });
+      message: 'The record was updated successfully.'
+    })
+  })
 
 exports.destroy = (Model) =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.destroy({ where: { id: req.params.id } });
-    if (doc <= 0) return next(new Error('No hay documento con id : ' + req.params.id));
-    return res.status(204).json({
+    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError('The id is required to delete a record and has to be a valid value.', 400))
+    const doc = await Model.destroy({ where: { id: req.params.id } })
+    if (doc <= 0) return next(new AppError(`No hay registro para el id :  ${req.params.id} `, 404))
+    return res.status(200).json({
+      ok: true,
+      status: 'success',
+      code: 200,
+      message: 'The record was deleted successfully.',
+      data: null
+    })
+  })
+
+exports.seed = (Model, type) =>
+  catchAsync(async (req, res) => {
+    const data = []
+    const q = req.query.quantity || 20
+    for (let i = 0; i < q; i++) {
+      data.push(generateFakeData(type))
+    }
+    const doc = await Model.bulkCreate(data)
+    return res.json({
+      ok: true,
       code: 200,
       status: 'success',
-      ok: true,
-      message: 'El documento fue actualizado con exito',
-      data: null,
-    });
-  });
+      message: 'The records were created successfully.',
+      data: doc
+    })
+  })

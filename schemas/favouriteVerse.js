@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const { dbConnect } = require('./../db/index');
+const { DataTypes } = require('sequelize')
+const { dbConnect } = require('./../db/index')
 const FavouriteVerse = dbConnect.define(
   'FavouriteVerse',
   {
@@ -7,61 +7,68 @@ const FavouriteVerse = dbConnect.define(
       primaryKey: true,
       allowNull: false,
       type: DataTypes.BIGINT,
-      autoIncrement: true,
+      autoIncrement: true
     },
     uuid: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      defaultValue: DataTypes.UUIDV4
     },
-    // UserId: {
-    //   type: DataTypes.BIGINT,
-    //   allowNull: false,
-    //   references: {
-    //     model: User,
-    //     key: 'id',
-    //   },
-    // },
+    UserId: {
+      type: DataTypes.BIGINT,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: 'UserId est obligatoire. '
+        },
+        notNull: {
+          msg: 'UserId est obligatoire. '
+        }
+
+      }
+    },
     verses: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: false
     },
     texts: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.JSON,
+      allowNull: false
     },
     bookName: {
-      type: DataTypes.STRING,
-      allowNull: false,
+      type: DataTypes.STRING(70),
+      allowNull: false
     },
     bookNumber: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: false
     },
     version: {
       type: DataTypes.JSON,
-      allowNull: false,
+      allowNull: false
     },
     chapter: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: false
     },
-    note: {
-      type: DataTypes.STRING,
-    },
-    color: {
-      type: DataTypes.STRING(20),
-    },
+    note: DataTypes.STRING,
+    color: DataTypes.STRING(20),
     type: {
       type: DataTypes.STRING(15),
       allowNull: false,
       validate: {
-        isIn: [['HIGHLIGHT', 'NOTE', 'FAVOURITE']],
-      },
-    },
+        isIn: {
+          args: [['HIGHLIGHT', 'NOTE', 'FAVOURITE']],
+          msg: 'Type must be either HIGHLIGHT, NOTE or FAVOURITE'
+        }
+
+      }
+    }
   },
   {
     tableName: 'favouritesverses',
+    modelName: 'FavouriteVerse',
+    timestamps: true
   }
-);
+)
 
-module.exports = FavouriteVerse;
+module.exports = FavouriteVerse
