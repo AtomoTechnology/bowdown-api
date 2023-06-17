@@ -45,7 +45,7 @@ exports.signIn = catchAsync(async (req, res, next) => {
 exports.protect = catchAsync(async (req, res, next) => {
   let token
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) token = req.headers.authorization.split(' ')[1]
-
+  console.log('TOKEN :: ', token)
   if (!token) return next(new AppError('You are not logged , please log in to get access!', 401))
 
   const decoded = await promisify(jwt.verify)(token, process.env.SECRET_TOKEN_ATPJ)

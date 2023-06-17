@@ -5,4 +5,21 @@ cloudinary.config({
   api_secret: 'ZJOJeLBR_75qTwdmxBcAcGO6w3I'
 })
 
-module.exports = { cloudinary }
+const uploadPhoto = async (file, folder, publicId = undefined, format = 'png') => {
+  try {
+    const res = await cloudinary.uploader.upload(file, {
+      folder,
+      use_filename: true,
+      format,
+      unique_filename: true,
+      overwrite: true,
+      public_id: publicId
+    })
+    return res
+  } catch (error) {
+    // console.log('ERROR INSIDE:: ', error)
+    return error
+  }
+}
+
+module.exports = { cloudinary, uploadPhoto }

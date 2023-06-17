@@ -8,6 +8,7 @@ Routes.use(`/api/${VERSION}/songs`, require('./songRoutes'))
 Routes.use(`/api/${VERSION}/songs-categories`, require('./songCategoryRoutes'))
 Routes.use(`/api/${VERSION}/favorites-songs`, require('./favoriteSongRoutes'))
 Routes.use(`/api/${VERSION}/bible`, require('./bibleRoutes'))
+Routes.use(`/api/${VERSION}/devotions`, require('./devotionRoutes'))
 
 // Routes.use(`/api/${VERSION}/books`, require('./bookRoutes'));
 // Routes.use(`/api/${VERSION}/favorites-verses`, require('./favouriteVersesRoute'));
@@ -18,6 +19,5 @@ Routes.use(`/api/${VERSION}/bible`, require('./bibleRoutes'))
 // Routes.get(`/api/${VERSION}/bible/searchByBookChapter_Verse`, searchByBookChapter_Verse);
 
 // devotions
-// Routes.get(`/api/${VERSION}/devotions`, getAll);
 
 module.exports = Routes

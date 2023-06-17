@@ -12,13 +12,14 @@ app.use(helmet())
 app.set('view engine', 'pug')
 app.set('views', path.join(__dirname, '/views'))
 app.use(express.static(path.join(__dirname, 'public')))
-app.use(express.json({ limit: '20kb' }))
-app.use(express.urlencoded({ extended: true, limit: '10kb' }))
+app.use(express.json({ limit: '1MB' }))
+app.use(express.urlencoded({ extended: true, limit: '1MB' }))
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'))
 
   // require('./schemas/user')
+  require('./schemas/devotion')
   // require('./schemas/songCategory')
   // require('./schemas/song')
   // require('./schemas/favouriteSong')

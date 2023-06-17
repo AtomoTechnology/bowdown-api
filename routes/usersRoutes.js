@@ -16,6 +16,7 @@ usersRouter.post('/renewToken', authController.renewToken)
 usersRouter.get('/Me', userController.GetMe, userController.getUser)
 usersRouter.patch('/updateMyPassword', authController.updatePassword)
 usersRouter.patch('/updateMe', authController.restrictTo('user', 'manager', 'admin'), userController.updateMe)
+usersRouter.patch('/updatePhoto', authController.restrictTo('user', 'manager', 'admin'), userController.uploadUserPhoto)
 usersRouter.delete('/deleteMe', authController.restrictTo('user', 'manager'), userController.deleteMe)
 
 usersRouter.use(authController.restrictTo('admin'))

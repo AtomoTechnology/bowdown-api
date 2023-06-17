@@ -3,6 +3,8 @@ const catchAsync = require('../helpers/catchAsync')
 const User = require('./../schemas/user')
 const factory = require('./factoryController')
 const FavouriteVerse = require('../schemas/favouriteVerse')
+const { uploadPhoto } = require('../helpers/cloudinary')
+const { default: slugify } = require('slugify')
 
 exports.getUser = factory.findOne(User, { include: [{ model: FavouriteVerse }] })
 exports.getAllUsers = factory.all(User)
@@ -44,4 +46,16 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
     code: 200,
     data: null
   })
+})
+
+exports.uploadUserPhoto = catchAsync(async (req, res, next) => {
+  if (!req.body.photo) return next(new AppError('Please provide a photo', 400))
+  const user = await User.findByPk(req.user.id)
+  if (!user) return next(new AppError('The user does no longer exist', 401))
+  const resp = await uploadPhoto(req.body.photo, 'ATESPIEDSJESUS/USERS', slugify(user.username, { lower: true }) + '_' + user.id + '_' + user.role)
+  console.log('RES CLOUNDINAY :: ', resp)
+  if (resp.error) return next(new AppError(resp.error.message, 400))
+  user.photo = resp.secure_url
+  await user.save()
+  return res.status(200).json({ ok: true, code: 200, status: 'success', data: { photo: resp.secure_url } })
 })

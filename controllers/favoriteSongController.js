@@ -5,4 +5,5 @@ const SongCategory = require('../schemas/songCategory')
 
 exports.GetAll = factory.all(FavouriteSong, { include: [{ model: Song, include: [{ model: SongCategory, attributes: ['name'] }] }] })
 exports.Create = factory.create(FavouriteSong, ['UserId', 'SongId'])
+exports.findOne = factory.findOne(FavouriteSong)
 exports.Destroy = factory.destroy(FavouriteSong)
