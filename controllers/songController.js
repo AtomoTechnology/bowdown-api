@@ -25,7 +25,8 @@ const songsBook = songs.map((s) => ({
 exports.GetAll = factory.all(Song, { include: [{ model: SongCategory }] })
 exports.paginate = factory.paginate(Song, { include: [{ model: SongCategory }] })
 exports.Create = factory.create(Song, ['title', 'num', 'video', 'lyrics', 'songId', 'lyricsHtml', 'language', 'likes', 'views', 'slug', 'SongCategoryId'])
-exports.FindByPk = factory.findByPk(Song, { include: [{ model: User }] })
+exports.update = factory.update(Song, ['video', 'lyrics', 'lyricsHtml'])
+exports.FindByPk = factory.findByPk(Song, { include: [{ model: User }] }) // TODO :  use the user info to validate if the user has already liked the song or has it as favorite
 exports.bulk = factory.bulk(Song, songsBook)
 
 exports.addLikes = catchAsync(async (req, res, next) => {

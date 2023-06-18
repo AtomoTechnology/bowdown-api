@@ -11,6 +11,11 @@ const filterQueryParams = (queryFiltered) => {
             [Op.substring]: val[0]
           }
           break
+        case 'regex':
+          options[`${k}`] = {
+            [Op.regexp]: val[0]
+          }
+          break
         case 'eq':
           options[`${k}`] = {
             [Op.eq]: val[0]
