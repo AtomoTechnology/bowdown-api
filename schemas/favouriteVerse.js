@@ -32,7 +32,12 @@ const FavouriteVerse = dbConnect.define(
     },
     texts: {
       type: DataTypes.JSON,
-      allowNull: false
+      allowNull: false,
+      get () {
+        const texts = this.getDataValue('texts')
+        return JSON.parse(texts)
+      }
+
     },
     bookName: {
       type: DataTypes.STRING(70),
