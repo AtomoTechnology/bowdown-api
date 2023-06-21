@@ -12,8 +12,8 @@ exports.dbConnect = new Sequelize({
   password: process.env.NODE_ENV === 'development' ? 'jhm.ok' : '',
   define: {
     timestamps: false,
-    charset: 'utf8',
-    collate: 'utf8_general_ci'
+    charset: 'utf8mb4',
+    collate: 'utf8mb4_unicode_ci'
   }
   // storage: './db/atespiedsjesus.SQLite3'
 })

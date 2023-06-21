@@ -67,6 +67,18 @@ const FavouriteVerse = dbConnect.define(
         }
 
       }
+    },
+    visibility: {
+      type: DataTypes.STRING(7),
+      allowNull: false,
+      defaultValue: 'PRIVATE',
+      validate: {
+        isIn: {
+          args: [['PRIVATE', 'PUBLIC', 'FRIENDS']],
+          msg: 'Visibility must be either PRIVATE, PUBLIC or FRIENDS'
+        }
+
+      }
     }
   },
   {

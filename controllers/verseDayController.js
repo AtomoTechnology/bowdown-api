@@ -6,17 +6,19 @@ const AppError = require('../helpers/AppError')
 
 exports.GetAll = factory.all(VerseDay)
 exports.Paginate = factory.paginate(VerseDay)
-exports.Create = factory.create(VerseDay, ['bookName', 'verse', 'chapter', 'text', 'bookNumber', 'version'])
+exports.Create = factory.create(VerseDay, ['bookName', 'verses', 'chapter', 'texts', 'bookNumber', 'version'])
 exports.FindOne = factory.findOne(VerseDay)
 exports.Destroy = factory.destroy(VerseDay)
 
 exports.getVerseOfTheDay = catchAsync(async (req, res, next) => {
-  const votd = await VerseDay.findOne({ order: [['createdAt', 'desc']] })
+  console.log('wass')
+  const votd = await VerseDay.findOne({ order: [['id', 'DESC']] })
   return res.json({
     ok: true,
     code: 200,
     status: 'success',
-    data: votd
+    data: votd,
+    isThat: 'yes'
   })
 })
 exports.getVerseOfTheDayPause = catchAsync(async (req, res, next) => {

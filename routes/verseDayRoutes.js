@@ -4,6 +4,7 @@ const verseDayController = require('./../controllers/verseDayController')
 
 const router = express.Router()
 
+router.get('/today/votd', verseDayController.getVerseOfTheDay)
 router
   .route('/')
   .get(verseDayController.GetAll)
@@ -13,7 +14,5 @@ router
   .route('/:id')
   .get(verseDayController.FindOne)
   .delete(authController.protect, authController.restrictTo('admin'), verseDayController.Destroy)
-
-router.get('/generate', authController.protect, authController.restrictTo('admin'), verseDayController.getVerseOfTheDay)
 
 module.exports = router

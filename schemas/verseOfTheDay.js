@@ -29,13 +29,17 @@ const VerseDay = dbConnect.define(
       type: DataTypes.INTEGER,
       allowNull: false
     },
-    verse: {
-      type: DataTypes.INTEGER,
+    verses: {
+      type: DataTypes.STRING(7),
       allowNull: false
     },
-    text: {
+    texts: {
       type: DataTypes.JSON,
-      allowNull: false
+      allowNull: false,
+      get () {
+        const texts = this.getDataValue('texts')
+        return JSON.parse(texts)
+      }
     }
   },
   {
