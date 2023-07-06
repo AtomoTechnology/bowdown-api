@@ -35,11 +35,11 @@ const VerseDay = dbConnect.define(
     },
     texts: {
       type: DataTypes.JSON,
-      allowNull: false,
-      get () {
-        const texts = this.getDataValue('texts')
-        return JSON.parse(texts)
-      }
+      allowNull: false
+      // get () {
+      //   const texts = this.getDataValue('texts')
+      //   return JSON.parse(texts)
+      // }
     }
   },
   {

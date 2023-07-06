@@ -14,6 +14,12 @@ router.delete(
   authController.restrictTo('user', 'admin'),
   bibleController.destroy
 )
+router.patch(
+  '/favourites/:id',
+  authController.protect,
+  authController.restrictTo('user', 'admin'),
+  bibleController.editFavouriteVerse
+)
 
 router.use(authController.fakeProtect)
 

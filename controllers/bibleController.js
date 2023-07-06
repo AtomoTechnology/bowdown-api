@@ -9,6 +9,7 @@ const factory = require('./factoryController')
 // include: [{ model: User }];
 exports.getAllFavouriteVerses = factory.all(FavouriteVerse)
 exports.createFavouriteVerse = factory.create(FavouriteVerse, ['UserId', 'uuid', 'verses', 'texts', 'chapter', 'note', 'type', 'color', 'bookName', 'bookNumber', 'version'])
+exports.editFavouriteVerse = factory.update(FavouriteVerse, ['note'])
 exports.destroy = factory.destroy(FavouriteVerse)
 
 exports.ValidatelanguageAndVersion = (req, res, next) => {

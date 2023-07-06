@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken')
 const AppError = require('../helpers/AppError')
 const Email = require('../helpers/email')
 const { Op } = require('sequelize')
+const { responses } = require('../translations/responses')
 
 const createToken = (id) => {
   return jwt.sign({ id }, process.env.SECRET_TOKEN_ATPJ, {
@@ -33,11 +34,11 @@ exports.signUp = catchAsync(async (req, res, next) => {
 exports.signIn = catchAsync(async (req, res, next) => {
   const { email, password } = req.body
 
-  if (!email || !password) return next(new AppError('Provide a email and a password please.', 400))
+  if (!email || !password) return next(new AppError(responses.provideEmailAndPassword[req.headers.language || process.env.DEFAULT_LANGUAGE], 400))
 
   const user = await User.findOne({ where: { email } })
 
-  if (!user || !(await user.checkPassword(password, user.password))) { return next(new AppError('Incorrect Email or  password.', 401)) }
+  if (!user || !(await user.checkPassword(password, user.password))) { return next(new AppError(responses.incorrectEmailOrPassword[req.headers.language || process.env.DEFAULT_LANGUAGE], 401)) }
 
   createSendToken(user, 200, res)
 })
@@ -45,7 +46,6 @@ exports.signIn = catchAsync(async (req, res, next) => {
 exports.protect = catchAsync(async (req, res, next) => {
   let token
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) token = req.headers.authorization.split(' ')[1]
-  console.log('TOKEN :: ', token)
   if (!token) return next(new AppError('You are not logged , please log in to get access!', 401))
 
   const decoded = await promisify(jwt.verify)(token, process.env.SECRET_TOKEN_ATPJ)
@@ -71,7 +71,7 @@ exports.fakeProtect = catchAsync(async (req, res, next) => {
 
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) return next(new AppError('You do not have permission to perform this application', 403))
+    if (!roles.includes(req.user.role)) return next(new AppError(responses.cannotPerformRole[req.headers.language || process.env.DEFAULT_LANGUAGE], 403))
     next()
   }
 }

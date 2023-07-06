@@ -2,6 +2,7 @@ const catchAsync = require('../helpers/catchAsync')
 const AppError = require('../helpers/AppError')
 const filterQueryParams = require('../helpers/filterqueryParams')
 const { generateFakeData } = require('../helpers/faker')
+const { responses } = require('../translations/responses')
 
 const filterFields = (obj, allowedFields) => {
   const newObj = {}
@@ -17,7 +18,7 @@ exports.create = (Model, allowedFileds = null) =>
       ok: true,
       code: 201,
       status: 'success',
-      message: 'The record was created successfully.',
+      message: responses.create[req.headers.language || process.env.DEFAULT_LANGUAGE],
       data: doc
     })
   })
@@ -30,7 +31,7 @@ exports.bulk = (Model, data = null) =>
       code: 200,
       results: doc.length,
       status: 'success',
-      message: 'The records were created successfully.',
+      message: responses.bulk[req.headers.language || process.env.DEFAULT_LANGUAGE],
       data: doc
     })
   })
@@ -119,13 +120,12 @@ exports.paginate = (Model, opts = null) =>
 
 exports.findByPk = (model, opts = null) =>
   catchAsync(async (req, res, next) => {
-    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError('The id is required to get a record and has to be a valid value.', 400))
+    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError(responses.invalidId[req.headers.language || process.env.DEFAULT_LANGUAGE], 400))
     let include = null
     if (opts && req.query.include === undefined) include = opts.include
     else include = undefined
-
     const doc = await model.findByPk(req.params.id, { include })
-    if (!doc) return next(new AppError('There is no document with that ID.', 404))
+    if (!doc) return next(new AppError(responses.docNotExist[req.headers.language || process.env.DEFAULT_LANGUAGE], 404))
     return res.status(200).json({
       ok: true,
       code: 200,
@@ -165,58 +165,56 @@ exports.findOne = (model, opts = null) =>
 
 exports.update = (Model, allowedFileds = null) =>
   catchAsync(async (req, res, next) => {
-    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError('The id is required to update a record and has to be a valid value.', 400))
+    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError(responses.invalidId[req.headers.language || process.env.DEFAULT_LANGUAGE], 400))
 
     const insertedFileds = allowedFileds ? filterFields(req.body, allowedFileds) : req.body
-    const doc = await Model.update(insertedFileds, { where: { id: req.params.id } })
-
-    if (doc[0] <= 0) return next(new AppError(`The record with id :  ${req.params.id} does not exist or no record was updated in the table.`, 304))
-
+    await Model.update(insertedFileds, { where: { id: req.params.id } })
+    // if (doc[0] <= 0) return next(new AppError(`The record with id :  ${req.params.id} does not exist or no record was updated in the table.`, 304))
     return res.json({
       ok: true,
       status: 'success',
       code: 200,
-      message: 'The record was updated successfully.'
+      message: responses.update[req.headers.language || process.env.DEFAULT_LANGUAGE]
     })
   })
 
 exports.down = (Model) =>
   catchAsync(async (req, res, next) => {
-    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError('The id is required to update a record and has to be a valid value.', 400))
+    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError(responses.invalidId[req.headers.language || process.env.DEFAULT_LANGUAGE], 400))
     const doc = await Model.update({ active: 0 }, { where: { id: req.params.id } })
-    if (doc[0] <= 0) return next(new AppError(`There is no record with the id :  ${req.params.id} `, 304))
+    if (doc[0] <= 0) return next(new AppError(responses.docNotExist[req.headers.language || process.env.DEFAULT_LANGUAGE], 304))
     return res.json({
       ok: true,
       status: 'success',
       code: 200,
-      message: 'The record was updated successfully.',
+      message: responses.update[req.headers.language || process.env.DEFAULT_LANGUAGE],
       data: null
     })
   })
 
 exports.up = (Model) =>
   catchAsync(async (req, res, next) => {
-    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError('The id is required to update a record and has to be a valid value.', 400))
+    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError(responses.invalidId[req.headers.language || process.env.DEFAULT_LANGUAGE], 400))
     const doc = await Model.update({ state: 1 }, { where: { id: req.params.id } })
-    if (doc[0] <= 0) return next(new AppError(`There is no record with the id :  ${req.params.id} `, 304))
+    if (doc[0] <= 0) return next(new AppError(responses.docNotExist[req.headers.language || process.env.DEFAULT_LANGUAGE], 304))
     return res.json({
       ok: true,
       status: 'success',
       code: 200,
-      message: 'The record was updated successfully.'
+      message: responses.update[req.headers.language || process.env.DEFAULT_LANGUAGE]
     })
   })
 
 exports.destroy = (Model) =>
   catchAsync(async (req, res, next) => {
-    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError('The id is required to delete a record and has to be a valid value.', 400))
+    if (!req.params.id || isNaN(+req.params.id)) return next(new AppError(responses.invalidId[req.headers.language || process.env.DEFAULT_LANGUAGE], 400))
     const doc = await Model.destroy({ where: { id: req.params.id } })
-    if (doc <= 0) return next(new AppError(`No hay registro para el id :  ${req.params.id} `, 404))
+    if (doc <= 0) return next(new AppError(responses.docNotExist[req.headers.language || process.env.DEFAULT_LANGUAGE], 404))
     return res.status(200).json({
       ok: true,
       status: 'success',
       code: 200,
-      message: 'The record was deleted successfully.',
+      message: responses.delete[req.headers.language || process.env.DEFAULT_LANGUAGE],
       data: null
     })
   })
@@ -233,7 +231,7 @@ exports.seed = (Model, type) =>
       ok: true,
       code: 200,
       status: 'success',
-      message: 'The records were created successfully.',
+      message: responses.bulk[req.headers.language || process.env.DEFAULT_LANGUAGE],
       data: doc
     })
   })

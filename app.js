@@ -19,7 +19,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'))
 
   // require('./schemas/user')
-  require('./schemas/devotion')
+  // require('./schemas/devotion')
   // require('./schemas/songCategory')
   // require('./schemas/song')
   // require('./schemas/favouriteSong')

@@ -1,13 +1,14 @@
 const AppError = require('../helpers/AppError')
+const { responses } = require('../translations/responses')
 
 const handleSequelizeValidationError = (error) => new AppError(error.errors.map((e) => e.message).join(',,'), 400)
 const handleSequelizeForeignKeyConstraintError = (error) => new AppError(`There is a problem with the foreign key(s) (${error.fields?.join(',')}) in table ${error?.table}. Make sure you submit the data correctly.`, 400)
 const handleSequelizeUniqueConstraintError = (error) => new AppError(error.errors.map((e) => e.message).join(',,'), 400)
-const handleJsonWebTokenError = () => new AppError('Invalid token. Sign in again.', 401)
-const handleJWTExpiredToken = () => new AppError('Your token has expired. Please login again.', 401)
-const handleSequelizeAccessDeniedError = () => new AppError('Error trying to connect to the database. Verify that all connection data is correct.', 401)
+const handleJsonWebTokenError = (req) => new AppError(responses.invalidToken[req.headers.language || process.env.DEFAULT_LANGUAGE], 401)
+const handleJWTExpiredToken = (req) => new AppError(responses.expiredToken[req.headers.language || process.env.DEFAULT_LANGUAGE], 401)
+const handleSequelizeAccessDeniedError = (req) => new AppError(responses.connectionError[req.headers.language || process.env.DEFAULT_LANGUAGE], 401)
 
-const sendError = (err, res) => {
+const sendError = (err, res, req) => {
   if (process.env.NODE_ENV !== 'production') {
     return res.status(err.statusCode).json({
       ok: false,
@@ -29,7 +30,7 @@ const sendError = (err, res) => {
     })
   }
 
-  return res.status(500).json({ ok: false, status: 'error', code: 500, message: 'Something went wrong!! Please try again.' })
+  return res.status(500).json({ ok: false, status: 'error', code: 500, message: responses.unknownError[req.headers.language || process.env.DEFAULT_LANGUAGE] })
 }
 
 module.exports = (err, req, res, next) => {
@@ -38,12 +39,12 @@ module.exports = (err, req, res, next) => {
 
   let error = Object.assign(err)
   // console.log(error);
-  if (error.name === 'SequelizeAccessDeniedError') error = handleSequelizeAccessDeniedError()
-  if (error.name === 'JsonWebTokenError') error = handleJsonWebTokenError()
-  if (error.name === 'TokenExpiredError') error = handleJWTExpiredToken()
+  if (error.name === 'SequelizeAccessDeniedError') error = handleSequelizeAccessDeniedError(req)
+  if (error.name === 'JsonWebTokenError') error = handleJsonWebTokenError(req)
+  if (error.name === 'TokenExpiredError') error = handleJWTExpiredToken(req)
   if (error.name === 'SequelizeValidationError') error = handleSequelizeValidationError(error)
   if (error.name === 'SequelizeUniqueConstraintError') error = handleSequelizeUniqueConstraintError(error)
   if (error.name === 'SequelizeForeignKeyConstraintError') error = handleSequelizeForeignKeyConstraintError(error)
 
-  sendError(error, res)
+  sendError(error, res, req)
 }
